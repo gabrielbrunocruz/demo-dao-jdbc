@@ -48,23 +48,18 @@ public class SellerDaoJDBC implements SellerDao {
 		
 		try {
 		st=conn.prepareStatement(
-				"SELECT seller INNER JOIN department"
-				+ "ON seller.Department = department.Id"
-				+ "WHERE seller.Id = ?");
+				"SELECT seller.*, department.Name as DepName "
+				+ "FROM seller INNER JOIN department "
+				+ "On seller.DepartmentId = department.Id "
+				+ "WHERE seller.id = ?");
+				
+				
 		
 		st.setInt(1, id);
 		rs = st.executeQuery();
 		if(rs.next()) {
-			Department dep = new Department();
-			dep.setId(rs.getInt("DepartmentId"));
-			dep.setName(rs.getString("DepName"));
-			Seller obj = new Seller();
-			obj.setId(rs.getInt("Id"));
-			obj.setName(rs.getString("Name"));
-			obj.setEmail(rs.getString("Email"));
-			obj.setBaseSalary(rs.getDouble("BaseSalary"));
-			obj.setBithDate(rs.getObject("BirthDate",LocalDate.class));
-			obj.setDepartment(dep);
+			Department dep = instantiateDepartment(rs);
+			Seller obj = instanciateSeller(rs, dep);
 			return obj;
 		}
 		return null;
@@ -80,9 +75,26 @@ public class SellerDaoJDBC implements SellerDao {
 		
 	}
 
+	private Seller instanciateSeller(ResultSet rs, Department dep) throws SQLException {
+		Seller obj = new Seller();
+		obj.setId(rs.getInt("Id"));
+		obj.setName(rs.getString("Name"));
+		obj.setEmail(rs.getString("Email"));
+		obj.setBaseSalary(rs.getDouble("BaseSalary"));
+		obj.setBithDate(rs.getObject("BirthDate",LocalDate.class));
+		obj.setDepartment(dep);
+		return obj;
+	}
+
+	private Department instantiateDepartment(ResultSet rs) throws SQLException {
+		Department dep = new Department();
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName(rs.getString("DepName"));
+		return dep;
+	}
+
 	@Override
 	public List<Seller> findAll() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
