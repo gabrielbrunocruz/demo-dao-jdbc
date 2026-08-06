@@ -1,6 +1,9 @@
 package application;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import com.mysql.cj.protocol.a.LocalDateTimeValueEncoder;
 
 import model.dao.DaoFactory;
 import model.dao.SellerDao;
@@ -27,6 +30,12 @@ public class Program {
 		System.out.println("\n===TEST 3: seller findAll ===");
 		list = sellerDao.findAll();
 		list.forEach(System.out::println);
+		
+		System.out.println("\n===TEST 4: seller Insert ===");
+		Seller newSeller = new Seller(null, "Greg", "greg@gmail.com", LocalDate.now(),4000.0,department);
+		sellerDao.insert(newSeller);
+		System.out.println(newSeller.getId());
+
 	}
 
 }

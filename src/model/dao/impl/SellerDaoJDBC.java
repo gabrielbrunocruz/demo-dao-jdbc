@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,8 +27,42 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
 
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			st = conn.prepareStatement("INSERT INTO seller "
+					+ "(Name, Email, BirthDate, BaseSalary, DepartmentId) "
+					+ "VALUES (?, ?, ?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
+			
+			
+			st.setString(1, obj.getName());
+			st.setString(2, obj.getEmail());
+			st.setObject(3, obj.getBirthDate());
+			st.setDouble(4,obj.getBaseSalary());
+			st.setInt(5, obj.getDepartment().getId());
+			int rowsAffected = st.executeUpdate();
+			
+			if(rowsAffected > 0) {
+				rs = st.getGeneratedKeys();
+				if(rs.next()) {
+					int id = rs.getInt(1);
+					obj.setId(id);
+				}
+			}
+			else {
+				throw new DbException("Error. Nenhuma linha afetada");
+			}
+		}
+		catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
@@ -82,7 +117,7 @@ public class SellerDaoJDBC implements SellerDao {
 		obj.setName(rs.getString("Name"));
 		obj.setEmail(rs.getString("Email"));
 		obj.setBaseSalary(rs.getDouble("BaseSalary"));
-		obj.setBithDate(rs.getObject("BirthDate",LocalDate.class));
+		obj.setBirthDate(rs.getObject("BirthDate",LocalDate.class));
 		obj.setDepartment(dep);
 		return obj;
 	}
